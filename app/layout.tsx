@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     siteName: SITE_NAME,
     locale: 'ko_KR',
     type: 'website',
-    images: [{ url: `${SITE_URL}/thumb.webp`, width: 1200, height: 630, alt: '미용입시 학원비 비교 사이트' }],
+    images: [{ url: `${SITE_URL}/thumb.png`, width: 1200, height: 630, alt: '미용입시 학원비 비교 사이트' }],
   },
   twitter: { card: 'summary_large_image', title: TITLE, description: DESC },
   authors: [{ name: SITE_NAME }],
@@ -39,12 +39,13 @@ export const metadata: Metadata = {
   formatDetection: { telephone: false, date: false, address: false, email: false },
   other: {
     'google-adsense-account': 'ca-pub-5378247298190063',
+    'naver-site-verification': 'c4b367471ae09ec2c14b4db75098c1a37dfb2c3f',
     NaverBot: 'all', Yeti: 'all', googlebot: 'all',
     subject: SITE_NAME, publisher: SITE_NAME, author: SITE_NAME,
     location: 'South Korea', distribution: 'global', rating: 'general',
     'format-detection': 'telephone=no, date=no, address=no, email=no',
     'itemprop:name': TITLE, 'itemprop:description': DESC,
-    'itemprop:image': `${SITE_URL}/thumb.webp`,
+    'itemprop:image': `${SITE_URL}/thumb.png`,
   },
 }
 
@@ -132,7 +133,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           strategy="beforeInteractive" />
         <meta itemProp="name" content={TITLE} />
         <meta itemProp="description" content={DESC} />
-        <meta itemProp="image" content={`${SITE_URL}/thumb.webp`} />
+        <meta itemProp="image" content={`${SITE_URL}/thumb.png`} />
         <Script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX" strategy="afterInteractive" />
         <Script id="gtag-init" strategy="afterInteractive">{`
           window.dataLayer = window.dataLayer || [];
