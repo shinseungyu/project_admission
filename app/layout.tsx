@@ -36,10 +36,14 @@ export const metadata: Metadata = {
   authors: [{ name: SITE_NAME }],
   publisher: SITE_NAME,
   robots: { index: true, follow: true },
+  verification: {
+    other: {
+      'naver-site-verification': 'c4b367471ae09ec2c14b4db75098c1a37dfb2c3f',
+    },
+  },
   formatDetection: { telephone: false, date: false, address: false, email: false },
   other: {
     'google-adsense-account': 'ca-pub-5378247298190063',
-    'naver-site-verification': 'c4b367471ae09ec2c14b4db75098c1a37dfb2c3f',
     NaverBot: 'all', Yeti: 'all', googlebot: 'all',
     subject: SITE_NAME, publisher: SITE_NAME, author: SITE_NAME,
     location: 'South Korea', distribution: 'global', rating: 'general',
