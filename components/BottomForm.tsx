@@ -162,9 +162,9 @@ export default function BottomForm() {
       <form
         onSubmit={handleSubmit}
         aria-label="올댓뷰티 멘토 무료 상담 신청"
-        className="mx-auto w-full max-w-6xl px-3 py-2 sm:px-4"
+        className="mx-auto w-full max-w-6xl px-3 py-1.5 sm:px-4 sm:py-2"
       >
-        <div className="grid grid-cols-2 gap-2 lg:grid-cols-[repeat(20,minmax(0,1fr))] lg:items-center">
+        <div className="grid grid-cols-2 gap-1.5 lg:grid-cols-[repeat(20,minmax(0,1fr))] lg:items-center lg:gap-2">
 
           {/* 이름 */}
           <div className="min-w-0 lg:col-span-2">
@@ -175,7 +175,7 @@ export default function BottomForm() {
               value={form.customer_name}
               onChange={(e) => set('customer_name', e.target.value)}
               maxLength={8}
-              placeholder="이름"
+              placeholder="예) 홍길동"
               autoComplete="name"
               aria-required="true"
               className={field}
@@ -215,7 +215,7 @@ export default function BottomForm() {
               value={form.customer_birth}
               onChange={(e) => set('customer_birth', e.target.value.replace(/\D/g, ''))}
               maxLength={6}
-              placeholder="생년월일 6자리"
+              placeholder="예) 060101"
               autoComplete="bday"
               aria-required="true"
               className={field}
@@ -293,7 +293,7 @@ export default function BottomForm() {
           {/* 만 14세 미만 보호자 정보 (본문 폼과 동일 조건) */}
           {minor && (
             <>
-              <div className="col-span-2 min-w-0 lg:col-span-8">
+              <div className="min-w-0 lg:col-span-8">
                 <label htmlFor="bf-guardian-name" className="sr-only">보호자 성함</label>
                 <input
                   id="bf-guardian-name"
@@ -301,13 +301,13 @@ export default function BottomForm() {
                   value={form.guardian_name}
                   onChange={(e) => set('guardian_name', e.target.value)}
                   maxLength={8}
-                  placeholder="보호자(부모님) 성함"
+                  placeholder="보호자 성함"
                   autoComplete="name"
                   aria-required="true"
                   className={field}
                 />
               </div>
-              <div className="col-span-2 min-w-0 lg:col-span-9">
+              <div className="min-w-0 lg:col-span-9">
                 <label htmlFor="bf-guardian-phone" className="sr-only">보호자 연락처</label>
                 <input
                   id="bf-guardian-phone"
@@ -316,7 +316,7 @@ export default function BottomForm() {
                   value={form.guardian_phone}
                   onChange={(e) => set('guardian_phone', e.target.value.replace(/\D/g, ''))}
                   maxLength={11}
-                  placeholder="보호자 연락처 (숫자만)"
+                  placeholder="보호자 연락처"
                   autoComplete="tel"
                   aria-required="true"
                   className={field}
@@ -336,48 +336,56 @@ export default function BottomForm() {
         </div>
 
         {/* 동의 + 상태 문구 */}
-        <div className="mt-1.5 flex flex-col gap-1 lg:flex-row lg:items-center lg:justify-between lg:gap-4">
-          <div className="text-[11px] leading-snug text-stone-500 sm:text-xs">
-            <input
-              id="bottom-form-agree"
-              type="checkbox"
-              checked={agree}
-              onChange={(e) => setAgree(e.target.checked)}
-              aria-required="true"
-              className="mr-1.5 h-4 w-4 align-[-3px] accent-stone-900"
-            />
-            <label htmlFor="bottom-form-agree" className="cursor-pointer select-none">
-              <span className="font-bold text-stone-700">(필수)</span> 개인정보 수집 및 이용 동의, 개인정보 제3자 제공 동의에 모두 동의합니다.
-            </label>{' '}
-            <a
-              href="/privacy"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-bold text-stone-700 underline underline-offset-2 hover:text-stone-900"
-            >
-              상세
-            </a>
+        <div className="mt-1.5 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <div className="flex items-center gap-1.5">
+              <input
+                id="bottom-form-agree"
+                type="checkbox"
+                checked={agree}
+                onChange={(e) => setAgree(e.target.checked)}
+                aria-required="true"
+                className="h-3.5 w-3.5 shrink-0 accent-stone-900"
+              />
+              <label
+                htmlFor="bottom-form-agree"
+                className="cursor-pointer select-none whitespace-nowrap text-[11px] text-stone-600 sm:text-xs"
+              >
+                <span className="font-bold text-stone-800">[필수]</span> 개인정보 동의
+              </label>
+              <a
+                href="/privacy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="whitespace-nowrap text-[11px] font-bold text-stone-500 underline underline-offset-2 hover:text-stone-900 sm:text-xs"
+              >
+                상세
+              </a>
+            </div>
+
             {minor && (
-              <>
-                <br />
+              <div className="flex items-center gap-1.5">
                 <input
                   id="bottom-form-guardian-agree"
                   type="checkbox"
                   checked={guardianAgree}
                   onChange={(e) => setGuardianAgree(e.target.checked)}
                   aria-required="true"
-                  className="mr-1.5 h-4 w-4 align-[-3px] accent-stone-900"
+                  className="h-3.5 w-3.5 shrink-0 accent-stone-900"
                 />
-                <label htmlFor="bottom-form-guardian-agree" className="cursor-pointer select-none">
-                  <span className="font-bold text-amber-800">(필수)</span> 만 14세 미만이므로 법정대리인(보호자) 동의를 받았습니다.
+                <label
+                  htmlFor="bottom-form-guardian-agree"
+                  className="cursor-pointer select-none whitespace-nowrap text-[11px] text-stone-600 sm:text-xs"
+                >
+                  <span className="font-bold text-amber-700">[필수]</span> 보호자 동의
                 </label>
-              </>
+              </div>
             )}
           </div>
 
           <p
             aria-live="polite"
-            className={`min-h-[14px] shrink-0 text-[11px] leading-tight lg:text-right ${statusClass}`}
+            className={`min-h-[14px] text-[11px] leading-tight ${statusClass}`}
           >
             {message}
           </p>
