@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { parsePhone } from "@/lib/validate"
+import { isUnder14, parsePhone } from "@/lib/validate"
 import { REGIONS, MAJORS } from "@/data/constants"
 
 import PrivacyModal from "./PrivacyModal"
@@ -9,18 +9,6 @@ import PrivacyModal from "./PrivacyModal"
 type Props = {
   sourcePage?: string
   variant?: "hero" | "inline"
-}
-
-function isUnder14(birth: string): boolean {
-  if (!/^\d{6}$/.test(birth)) return false
-  const yy = parseInt(birth.slice(0, 2))
-  const mm = parseInt(birth.slice(2, 4))
-  const dd = parseInt(birth.slice(4, 6))
-  const fullYear = yy > 26 ? 1900 + yy : 2000 + yy
-  const today = new Date()
-  let age = today.getFullYear() - fullYear
-  if (today.getMonth() + 1 < mm || (today.getMonth() + 1 === mm && today.getDate() < dd)) age--
-  return age < 14
 }
 
 export default function LeadForm({ sourcePage = "main", variant = "hero" }: Props) {

@@ -24,14 +24,22 @@
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
   --radius: 0.625rem;
-  /* 하단 고정 바텀폼 / 기존 모바일 하단 바 높이 (BottomForm.tsx 가 실제 높이로 갱신) */
-  --bottom-form-h: 122px;
+  /* 하단 고정 바텀폼 / 기존 모바일 하단 바 높이 (BottomForm.tsx 가 실제 높이로 갱신).
+     아래 값은 하이드레이션 전 폴백이며 실측치(1280: 81px / 375: 241px + 모바일바 99px)를 넣어 둔다. */
+  --bottom-form-h: 81px;
   --mobile-bar-h: 0px;
+}
+
+/* lg 미만에서는 바텀폼이 2열 격자로 접히며 높아진다 */
+@media (max-width: 1023px) {
+  :root {
+    --bottom-form-h: 241px;
+  }
 }
 
 @media (max-width: 640px) {
   :root {
-    --mobile-bar-h: 100px;
+    --mobile-bar-h: 99px;
   }
 }
 

@@ -1,21 +1,49 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { parsePhone } from '@/lib/validate'
+import { isUnder14, parsePhone, validateLead } from '@/lib/validate'
+import { MAJORS, REGIONS } from '@/data/constants'
 
 type Status = 'idle' | 'sending' | 'done' | 'error'
 
 /**
- * 화면 하단 고정 간편 상담 바텀폼.
- * - 휴대폰 번호 + 필수 동의만 받아 기존 폼(LeadForm / compare)과 동일한 경로·필드명으로 전송한다.
- * - 바 높이를 --bottom-form-h CSS 변수로 노출해 body 하단 여백과 모바일 하단바 위치를 맞춘다.
+ * 화면 하단 고정 상담 바텀폼.
+ *
+ * - 본문 폼(components/LeadForm.tsx)이 사용자에게 입력받는 항목을 전부(이름·성별·생년월일·
+ *   연락처·지역·전공, 만 14세 미만이면 보호자 성함/연락처/보호자 동의) 동일하게 받는다.
+ *   본문 폼에 없는 항목은 새로 만들지 않는다.
+ * - 선택 목록(REGIONS/MAJORS)과 검증 규칙(lib/validate.ts)은 본문 폼과 같은 소스를 쓴다.
+ * - 모든 입력칸은 처음부터 노출한다(접기/펼치기 없음). 보호자 항목만 본문 폼과 같은 조건
+ *   (만 14세 미만)에서 나타난다.
+ * - 바 높이를 --bottom-form-h CSS 변수로 노출해 body 하단 여백과 기존 모바일 하단 바
+ *   (.mobile-bottom-bar, bottom: var(--bottom-form-h)) 위치를 맞춘다.
  */
+
+const EMPTY_FORM = {
+  customer_name: '',
+  customer_birth: '',
+  mobile1: '010',
+  mobile2: '',
+  customer_sex: '2',
+  major: '',
+  region: '',
+  guardian_name: '',
+  guardian_phone: '',
+}
+
 export default function BottomForm() {
   const barRef = useRef<HTMLDivElement>(null)
-  const [phone, setPhone] = useState('')
+  const [form, setForm] = useState(EMPTY_FORM)
   const [agree, setAgree] = useState(false)
+  const [guardianAgree, setGuardianAgree] = useState(false)
   const [status, setStatus] = useState<Status>('idle')
   const [message, setMessage] = useState('')
+
+  const set = (key: keyof typeof EMPTY_FORM, value: string) =>
+    setForm((p) => ({ ...p, [key]: value }))
+
+  // 본문 폼과 완전히 동일한 조건(lib/validate.ts 의 isUnder14)으로 보호자 항목을 노출한다.
+  const minor = isUnder14(form.customer_birth)
 
   useEffect(() => {
     const el = barRef.current
@@ -38,51 +66,54 @@ export default function BottomForm() {
     }
   }, [])
 
+  const fail = (msg: string) => {
+    setStatus('error')
+    setMessage(msg)
+  }
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (status === 'sending') return
 
-    if (!phone) {
-      setStatus('error')
-      setMessage('전화번호를 입력해 주세요.')
-      return
-    }
-    // 입력값 형식을 먼저 검증한다. (기존 LeadForm 도 입력 검증 → 동의 순서)
-    // 동의를 먼저 막으면 잘못된 번호를 넣어도 번호 안내 문구가 가려진다.
-    const phoneResult = parsePhone('010', phone)
-    if (typeof phoneResult === 'string') {
-      setStatus('error')
-      setMessage(phoneResult)
-      return
-    }
+    // 1) 공용 규칙(lib/validate.ts): 이름·특수문자·생년월일·성별·번호 자릿수.
+    //    동의는 바텀폼 자체 문구로 마지막에 검사하므로 여기서는 통과시킨다.
+    const fieldError = validateLead({ ...form, consent_privacy: true, consent_third_party: true })
+    if (fieldError) return fail(fieldError)
 
-    if (!agree) {
-      setStatus('error')
-      setMessage('필수 동의 항목에 동의해 주세요.')
-      return
-    }
+    // 2) 본문 폼(LeadForm)과 동일한 선택/보호자 항목 검사.
+    if (!form.region) return fail('지역을 선택해 주세요.')
+    if (!form.major) return fail('전공을 선택해 주세요.')
+    if (minor && !form.guardian_name) return fail('만 14세 미만은 보호자 성함을 입력해 주세요.')
+    if (minor && !form.guardian_phone) return fail('만 14세 미만은 보호자 연락처를 입력해 주세요.')
+
+    // 3) 번호 형식 검증은 동의 검증보다 먼저 한다.
+    //    동의를 먼저 막으면 잘못된 번호를 넣어도 번호 안내 문구가 가려진다.
+    const phoneResult = parsePhone(form.mobile1, form.mobile2)
+    if (typeof phoneResult === 'string') return fail(phoneResult)
+
+    // 4) 동의.
+    if (!agree) return fail('필수 동의 항목에 동의해 주세요.')
+    if (minor && !guardianAgree) return fail('만 14세 미만은 보호자 동의가 필요합니다.')
 
     setStatus('sending')
     setMessage('전송 중입니다...')
 
-    // 기존 폼(components/LeadForm.tsx, app/compare/page.tsx)과 동일한 필드명.
-    // 번호만 받으므로 나머지 입력 항목은 빈 값으로 보낸다.
+    // 본문 폼(components/LeadForm.tsx)과 동일한 키·값 규칙.
+    // major/interest_field/category 는 모두 선택한 전공의 라벨을 보낸다.
+    const majorLabel = MAJORS.find((m) => m.id === form.major)?.label ?? form.major
     const payload = {
-      customer_name: '',
-      customer_birth: '',
+      ...form,
+      major: majorLabel,
+      interest_field: majorLabel,
+      category: majorLabel,
       mobile1: phoneResult.mobile1,
       mobile2: phoneResult.mobile2,
-      customer_sex: '',
-      major: '',
-      region: '',
+      // 본문 폼에 입력칸이 없어 항상 빈 값인 항목. 키를 맞추기 위해서만 보낸다.
       target_school: '',
-      guardian_name: '',
-      guardian_phone: '',
-      interest_field: '',
-      category: '미용입시',
       source_page: 'bottom_form',
       consent_privacy: true,
       consent_third_party: true,
+      ...(minor ? { consent_guardian: true } : {}),
     }
 
     try {
@@ -100,8 +131,9 @@ export default function BottomForm() {
       }
       setStatus('done')
       setMessage('신청이 완료되었습니다. 곧 올댓뷰티 멘토가 연락드립니다.')
-      setPhone('')
+      setForm(EMPTY_FORM)
       setAgree(false)
+      setGuardianAgree(false)
     } catch {
       setStatus('error')
       setMessage('네트워크 오류가 발생했습니다.')
@@ -115,6 +147,12 @@ export default function BottomForm() {
         ? 'text-stone-800 font-bold'
         : 'text-stone-400'
 
+  const field =
+    'h-9 w-full rounded-full border border-stone-200 bg-white px-3 text-[13px] font-medium text-stone-800 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-brand/30 lg:h-10 lg:text-[14px]'
+  const select = `${field} appearance-none pr-7`
+  const arrow =
+    'pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-stone-400'
+
   return (
     <div
       ref={barRef}
@@ -123,58 +161,227 @@ export default function BottomForm() {
     >
       <form
         onSubmit={handleSubmit}
-        aria-label="휴대폰 번호 간편 상담 신청"
-        className="mx-auto w-full max-w-3xl px-3 py-2.5 sm:px-4"
+        aria-label="올댓뷰티 멘토 무료 상담 신청"
+        className="mx-auto w-full max-w-6xl px-3 py-2 sm:px-4"
       >
-        <div className="flex flex-wrap items-center gap-2">
-          <label htmlFor="bottom-form-phone" className="sr-only">휴대폰 번호</label>
-          <input
-            id="bottom-form-phone"
-            name="mobile2"
-            type="tel"
-            inputMode="numeric"
-            autoComplete="tel"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
-            maxLength={11}
-            placeholder="휴대폰 번호 ('-' 없이)"
-            aria-required="true"
-            className="min-w-0 flex-1 basis-[130px] rounded-full border border-stone-200 bg-white px-4 py-2.5 text-[15px] font-medium text-stone-800 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-brand/30"
-          />
+        <div className="grid grid-cols-2 gap-2 lg:grid-cols-[repeat(20,minmax(0,1fr))] lg:items-center">
+
+          {/* 이름 */}
+          <div className="min-w-0 lg:col-span-2">
+            <label htmlFor="bf-name" className="sr-only">이름</label>
+            <input
+              id="bf-name"
+              type="text"
+              value={form.customer_name}
+              onChange={(e) => set('customer_name', e.target.value)}
+              maxLength={8}
+              placeholder="이름"
+              autoComplete="name"
+              aria-required="true"
+              className={field}
+            />
+          </div>
+
+          {/* 성별 */}
+          <fieldset className="min-w-0 lg:col-span-2">
+            <legend className="sr-only">성별</legend>
+            <div className="flex h-9 gap-1 lg:h-10">
+              {[{ v: '1', label: '남' }, { v: '2', label: '여' }].map(({ v, label }) => (
+                <button
+                  key={v}
+                  type="button"
+                  onClick={() => set('customer_sex', v)}
+                  aria-pressed={form.customer_sex === v}
+                  aria-label={`성별 ${label}`}
+                  className={`h-full flex-1 rounded-full text-[13px] font-bold transition-all lg:text-[14px] ${
+                    form.customer_sex === v
+                      ? 'bg-brand text-white'
+                      : 'border border-stone-200 bg-stone-50 text-stone-400 hover:bg-stone-100'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </fieldset>
+
+          {/* 생년월일 */}
+          <div className="min-w-0 lg:col-span-3">
+            <label htmlFor="bf-birth" className="sr-only">생년월일 6자리</label>
+            <input
+              id="bf-birth"
+              type="text"
+              inputMode="numeric"
+              value={form.customer_birth}
+              onChange={(e) => set('customer_birth', e.target.value.replace(/\D/g, ''))}
+              maxLength={6}
+              placeholder="생년월일 6자리"
+              autoComplete="bday"
+              aria-required="true"
+              className={field}
+            />
+          </div>
+
+          {/* 연락처 */}
+          <fieldset className="min-w-0 lg:col-span-4">
+            <legend className="sr-only">연락처</legend>
+            <div className="flex gap-1">
+              <div className="relative w-[64px] shrink-0 lg:w-[76px]">
+                <label htmlFor="bf-mobile1" className="sr-only">연락처 앞자리</label>
+                <select
+                  id="bf-mobile1"
+                  value={form.mobile1}
+                  onChange={(e) => set('mobile1', e.target.value)}
+                  className={`${field} appearance-none px-2 pr-5`}
+                >
+                  {['010', '011', '016', '017', '019'].map((v) => (
+                    <option key={v} value={v}>{v}</option>
+                  ))}
+                </select>
+                <span className={arrow} aria-hidden="true">▼</span>
+              </div>
+              <div className="min-w-0 flex-1">
+                <label htmlFor="bf-mobile2" className="sr-only">연락처 뒷자리</label>
+                <input
+                  id="bf-mobile2"
+                  type="tel"
+                  inputMode="numeric"
+                  value={form.mobile2}
+                  onChange={(e) => set('mobile2', e.target.value.replace(/\D/g, ''))}
+                  maxLength={8}
+                  placeholder="'-' 없이"
+                  autoComplete="tel-local"
+                  aria-required="true"
+                  className={field}
+                />
+              </div>
+            </div>
+          </fieldset>
+
+          {/* 지역 */}
+          <div className="relative min-w-0 lg:col-span-3">
+            <label htmlFor="bf-region" className="sr-only">거주 지역</label>
+            <select
+              id="bf-region"
+              value={form.region}
+              onChange={(e) => set('region', e.target.value)}
+              aria-required="true"
+              className={`${select} ${!form.region ? 'text-stone-400' : ''}`}
+            >
+              <option value="" disabled hidden>지역 선택</option>
+              {REGIONS.map((r) => <option key={r} value={r}>{r}</option>)}
+            </select>
+            <span className={arrow} aria-hidden="true">▼</span>
+          </div>
+
+          {/* 전공 */}
+          <div className="relative min-w-0 lg:col-span-3">
+            <label htmlFor="bf-major" className="sr-only">관심 전공</label>
+            <select
+              id="bf-major"
+              value={form.major}
+              onChange={(e) => set('major', e.target.value)}
+              aria-required="true"
+              className={`${select} ${!form.major ? 'text-stone-400' : ''}`}
+            >
+              <option value="" disabled hidden>전공 선택</option>
+              {MAJORS.map((m) => <option key={m.id} value={m.id}>{m.label}</option>)}
+            </select>
+            <span className={arrow} aria-hidden="true">▼</span>
+          </div>
+
+          {/* 만 14세 미만 보호자 정보 (본문 폼과 동일 조건) */}
+          {minor && (
+            <>
+              <div className="col-span-2 min-w-0 lg:col-span-8">
+                <label htmlFor="bf-guardian-name" className="sr-only">보호자 성함</label>
+                <input
+                  id="bf-guardian-name"
+                  type="text"
+                  value={form.guardian_name}
+                  onChange={(e) => set('guardian_name', e.target.value)}
+                  maxLength={8}
+                  placeholder="보호자(부모님) 성함"
+                  autoComplete="name"
+                  aria-required="true"
+                  className={field}
+                />
+              </div>
+              <div className="col-span-2 min-w-0 lg:col-span-9">
+                <label htmlFor="bf-guardian-phone" className="sr-only">보호자 연락처</label>
+                <input
+                  id="bf-guardian-phone"
+                  type="tel"
+                  inputMode="numeric"
+                  value={form.guardian_phone}
+                  onChange={(e) => set('guardian_phone', e.target.value.replace(/\D/g, ''))}
+                  maxLength={11}
+                  placeholder="보호자 연락처 (숫자만)"
+                  autoComplete="tel"
+                  aria-required="true"
+                  className={field}
+                />
+              </div>
+            </>
+          )}
+
+          {/* 신청 버튼 */}
           <button
             type="submit"
             disabled={status === 'sending'}
-            className="shrink-0 rounded-full bg-stone-900 px-4 py-2.5 text-[14px] font-bold text-white transition-all hover:bg-stone-800 active:scale-[0.98] disabled:opacity-50 sm:px-6 sm:text-[15px]"
+            className="col-span-2 h-9 w-full rounded-full bg-stone-900 text-[14px] font-bold text-white transition-all hover:bg-stone-800 active:scale-[0.98] disabled:opacity-50 lg:col-span-3 lg:h-10 lg:text-[15px]"
           >
             {status === 'sending' ? '전송 중...' : '무료 상담 신청'}
           </button>
         </div>
 
-        <div className="mt-1.5 text-[11px] leading-snug text-stone-500 sm:text-xs">
-          <input
-            id="bottom-form-agree"
-            type="checkbox"
-            checked={agree}
-            onChange={(e) => setAgree(e.target.checked)}
-            aria-required="true"
-            className="mr-1.5 h-4 w-4 align-[-3px] accent-stone-900"
-          />
-          <label htmlFor="bottom-form-agree" className="cursor-pointer select-none">
-            <span className="font-bold text-stone-700">(필수)</span> 개인정보 수집 및 이용 동의, 개인정보 제3자 제공 동의에 모두 동의합니다.
-          </label>{' '}
-          <a
-            href="/privacy"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-bold text-stone-700 underline underline-offset-2 hover:text-stone-900"
-          >
-            상세
-          </a>
-        </div>
+        {/* 동의 + 상태 문구 */}
+        <div className="mt-1.5 flex flex-col gap-1 lg:flex-row lg:items-center lg:justify-between lg:gap-4">
+          <div className="text-[11px] leading-snug text-stone-500 sm:text-xs">
+            <input
+              id="bottom-form-agree"
+              type="checkbox"
+              checked={agree}
+              onChange={(e) => setAgree(e.target.checked)}
+              aria-required="true"
+              className="mr-1.5 h-4 w-4 align-[-3px] accent-stone-900"
+            />
+            <label htmlFor="bottom-form-agree" className="cursor-pointer select-none">
+              <span className="font-bold text-stone-700">(필수)</span> 개인정보 수집 및 이용 동의, 개인정보 제3자 제공 동의에 모두 동의합니다.
+            </label>{' '}
+            <a
+              href="/privacy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-bold text-stone-700 underline underline-offset-2 hover:text-stone-900"
+            >
+              상세
+            </a>
+            {minor && (
+              <>
+                <br />
+                <input
+                  id="bottom-form-guardian-agree"
+                  type="checkbox"
+                  checked={guardianAgree}
+                  onChange={(e) => setGuardianAgree(e.target.checked)}
+                  aria-required="true"
+                  className="mr-1.5 h-4 w-4 align-[-3px] accent-stone-900"
+                />
+                <label htmlFor="bottom-form-guardian-agree" className="cursor-pointer select-none">
+                  <span className="font-bold text-amber-800">(필수)</span> 만 14세 미만이므로 법정대리인(보호자) 동의를 받았습니다.
+                </label>
+              </>
+            )}
+          </div>
 
-        <p aria-live="polite" className={`mt-1 min-h-[14px] text-[11px] leading-tight ${statusClass}`}>
-          {message}
-        </p>
+          <p
+            aria-live="polite"
+            className={`min-h-[14px] shrink-0 text-[11px] leading-tight lg:text-right ${statusClass}`}
+          >
+            {message}
+          </p>
+        </div>
       </form>
     </div>
   )

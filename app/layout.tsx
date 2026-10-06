@@ -161,7 +161,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           .nav-cta:hover { background: #000000; }
           @media (max-width: 640px) { .nav-links { gap: 0.6rem; } .nav-link { font-size: 0.75rem; } .nav-desktop { display: none; } }
           .mobile-bottom-bar { display: none; }
-          @media (max-width: 640px) { .mobile-bottom-bar { display: flex; position: fixed; bottom: var(--bottom-form-h, 122px); left: 0; right: 0; z-index: 40; background: white; border-top: 1px solid #e5e7eb; padding: 0.75rem 1rem; gap: 0.5rem; } }
+          @media (max-width: 640px) { .mobile-bottom-bar { display: flex; position: fixed; bottom: var(--bottom-form-h, 241px); left: 0; right: 0; z-index: 40; background: white; border-top: 1px solid #e5e7eb; padding: 0.75rem 1rem; gap: 0.5rem; } }
         ` }} />
       </head>
       <body className={`${geist.variable} font-sans`}>

@@ -37,6 +37,22 @@ export function validateLead(data: Partial<LeadFormData>): string | null {
   return null
 }
 
+/**
+ * 만 14세 미만 여부. 생년월일 6자리(YYMMDD) 기준.
+ * 본문 폼(LeadForm)과 하단 바텀폼(BottomForm)이 보호자 항목 노출 조건으로 공용한다.
+ */
+export function isUnder14(birth: string): boolean {
+  if (!/^\d{6}$/.test(birth)) return false
+  const yy = parseInt(birth.slice(0, 2))
+  const mm = parseInt(birth.slice(2, 4))
+  const dd = parseInt(birth.slice(4, 6))
+  const fullYear = yy > 26 ? 1900 + yy : 2000 + yy
+  const today = new Date()
+  let age = today.getFullYear() - fullYear
+  if (today.getMonth() + 1 < mm || (today.getMonth() + 1 === mm && today.getDate() < dd)) age--
+  return age < 14
+}
+
 export function parsePhone(mobile1: string, mobile2: string): { mobile1: string; mobile2: string } | string {
   if (mobile2.length === 8) return { mobile1, mobile2 }
   if (mobile2.length === 11 && /^(010|011|016|017|018|019)/.test(mobile2.slice(0, 3))) {
