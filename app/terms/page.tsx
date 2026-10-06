@@ -22,7 +22,7 @@ export default function TermsPage() {
       <section style={S.section}>
         <h2 style={S.h2}>제1조 (목적)</h2>
         <p style={S.p}>
-          본 약관은 올댓뷰티(이하 &quot;회사&quot;)가 운영하는 미용입시 학원비 비교 서비스(이하 &quot;서비스&quot;)의
+          본 약관은 주식회사 와야미디어(이하 &quot;회사&quot;)가 운영하는 미용입시 학원비 비교 서비스(이하 &quot;서비스&quot;)의
           이용 조건 및 절차, 이용자와 회사 간의 권리·의무·책임사항을 규정하는 것을 목적으로 합니다.
         </p>
       </section>

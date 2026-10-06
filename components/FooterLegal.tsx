@@ -56,7 +56,7 @@ function PrivacyContent() {
   return (
     <>
       <div className="bg-amber-50 border-l-4 border-amber-400 px-4 py-3 rounded-lg text-sm">
-        와야미디어(이하 &quot;회사&quot;)는 「개인정보보호법」 및 관련 법령을 준수하며, 이용자의 개인정보를 안전하게 처리합니다.
+        주식회사 와야미디어(이하 &quot;회사&quot;)는 「개인정보보호법」 및 관련 법령을 준수하며, 이용자의 개인정보를 안전하게 처리합니다.
         본 방침은 회사가 운영하는 미용입시 학원비 비교 서비스에 적용됩니다.
       </div>
 
@@ -186,7 +186,7 @@ function PrivacyContent() {
         <table className="w-full text-xs border-collapse">
           <tbody>
             {[
-              ["수집 주체", "와야미디어"],
+              ["수집 주체", "주식회사 와야미디어"],
               ["책임자", "개인정보보호 담당자"],
               ["이메일", "shinsy711@gmail.com"],
               ["처리 시간", "영업일 기준 10일 이내"],
@@ -221,7 +221,7 @@ function TermsContent() {
     <>
       <Section title="제1조 목적">
         <p>
-          본 약관은 와야미디어(이하 &quot;회사&quot;)가 운영하는 미용입시 학원비 비교 서비스(이하 &quot;서비스&quot;)의
+          본 약관은 주식회사 와야미디어(이하 &quot;회사&quot;)가 운영하는 미용입시 학원비 비교 서비스(이하 &quot;서비스&quot;)의
           이용 조건 및 절차, 이용자와 회사 간의 권리·의무·책임사항을 규정하는 것을 목적으로 합니다.
         </p>
       </Section>

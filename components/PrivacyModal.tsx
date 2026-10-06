@@ -75,7 +75,7 @@ export default function PrivacyModal({ onConfirm, onClose, isMinor = false }: Pr
 
             <div className="space-y-4">
               <ContentBox checked={priAgree} onChange={setPriAgree} label="개인정보 수집 및 이용 동의" required>
-                수집 주체 : 와야미디어<br />
+                수집 주체 : 주식회사 와야미디어<br />
                 수집 목적 : 미용입시 학원비 비교 및 멘토 상담 안내<br />
                 수집 항목 : 성명, 휴대폰 번호, 생년월일, 성별, 거주 지역, 전공, 예산<br />
                 보유 기간 : 수집일로부터 1년 (또는 요청 시 즉시 파기)<br />

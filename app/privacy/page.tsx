@@ -23,7 +23,7 @@ export default function PrivacyPage() {
       <p style={{ color: '#9ca3af', marginBottom: '40px' }}>시행일: 2026년 1월 1일 &nbsp;|&nbsp; 최종 업데이트: 2026년 6월 20일</p>
 
       <div style={S.highlight}>
-        올댓뷰티(이하 &quot;회사&quot;)는 「개인정보보호법」 및 관련 법령을 준수하며, 이용자의 개인정보를 안전하게 처리합니다.
+        주식회사 와야미디어(이하 &quot;회사&quot;)는 「개인정보보호법」 및 관련 법령을 준수하며, 이용자의 개인정보를 안전하게 처리합니다.
         본 방침은 회사가 운영하는 미용입시 학원비 비교 서비스에 적용됩니다.
       </div>
 
@@ -187,8 +187,12 @@ export default function PrivacyPage() {
         <table style={S.table}>
           <tbody>
             <tr>
-              <td style={{ ...S.td, fontWeight: 600, width: '30%' }}>책임자</td>
-              <td style={S.td}>올댓뷰티 개인정보보호 담당자</td>
+              <td style={{ ...S.td, fontWeight: 600, width: '30%' }}>수집 주체</td>
+              <td style={S.td}>주식회사 와야미디어</td>
+            </tr>
+            <tr>
+              <td style={{ ...S.td, fontWeight: 600 }}>책임자</td>
+              <td style={S.td}>개인정보보호 담당자</td>
             </tr>
             <tr>
               <td style={{ ...S.td, fontWeight: 600 }}>이메일</td>
