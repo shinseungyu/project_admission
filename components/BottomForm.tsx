@@ -47,16 +47,18 @@ export default function BottomForm() {
       setMessage('전화번호를 입력해 주세요.')
       return
     }
-    if (!agree) {
-      setStatus('error')
-      setMessage('필수 동의 항목에 동의해 주세요.')
-      return
-    }
-
+    // 입력값 형식을 먼저 검증한다. (기존 LeadForm 도 입력 검증 → 동의 순서)
+    // 동의를 먼저 막으면 잘못된 번호를 넣어도 번호 안내 문구가 가려진다.
     const phoneResult = parsePhone('010', phone)
     if (typeof phoneResult === 'string') {
       setStatus('error')
       setMessage(phoneResult)
+      return
+    }
+
+    if (!agree) {
+      setStatus('error')
+      setMessage('필수 동의 항목에 동의해 주세요.')
       return
     }
 
