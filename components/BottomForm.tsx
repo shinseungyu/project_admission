@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { isUnder14, parsePhone, validateLead } from '@/lib/validate'
 import { MAJORS, REGIONS } from '@/data/constants'
+import PrivacyModal from './PrivacyModal'
 
 type Status = 'idle' | 'sending' | 'done' | 'error'
 
@@ -36,6 +37,7 @@ export default function BottomForm() {
   const [form, setForm] = useState(EMPTY_FORM)
   const [agree, setAgree] = useState(false)
   const [guardianAgree, setGuardianAgree] = useState(false)
+  const [showModal, setShowModal] = useState(false)
   const [status, setStatus] = useState<Status>('idle')
   const [message, setMessage] = useState('')
 
@@ -71,8 +73,9 @@ export default function BottomForm() {
     setMessage(msg)
   }
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+  // consented: 동의 모달에서 확인을 마친 뒤의 재호출. 모달이 두 동의(보호자 포함)를 이미 받았으므로 게이트를 건너뛴다.
+  const handleSubmit = async (e?: React.FormEvent<HTMLFormElement>, consented = false) => {
+    e?.preventDefault()
     if (status === 'sending') return
 
     // 1) 공용 규칙(lib/validate.ts): 이름·특수문자·생년월일·성별·번호 자릿수.
@@ -91,9 +94,12 @@ export default function BottomForm() {
     const phoneResult = parsePhone(form.mobile1, form.mobile2)
     if (typeof phoneResult === 'string') return fail(phoneResult)
 
-    // 4) 동의.
-    if (!agree) return fail('필수 동의 항목에 동의해 주세요.')
-    if (minor && !guardianAgree) return fail('만 14세 미만은 보호자 동의가 필요합니다.')
+    // 4) 동의 — 미동의면 본문 폼과 같이 동의 모달을 바로 띄운다. 모달에서 확인하면 handleConfirm 이 이어서 전송한다.
+    if (!consented && (!agree || (minor && !guardianAgree))) {
+      fail('필수 동의 항목에 동의해 주세요.')
+      setShowModal(true)
+      return
+    }
 
     setStatus('sending')
     setMessage('전송 중입니다...')
@@ -140,6 +146,14 @@ export default function BottomForm() {
     }
   }
 
+  // 모달에서 동의하면 동의 상태로 바꾸고 그대로 전송한다(본문 폼과 같은 흐름).
+  const handleConfirm = () => {
+    setAgree(true)
+    if (minor) setGuardianAgree(true)
+    setShowModal(false)
+    void handleSubmit(undefined, true)
+  }
+
   const statusClass =
     status === 'error'
       ? 'text-rose-600'
@@ -154,6 +168,10 @@ export default function BottomForm() {
     'pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-stone-400'
 
   return (
+    <>
+    {showModal && (
+      <PrivacyModal onConfirm={handleConfirm} onClose={() => setShowModal(false)} isMinor={minor} />
+    )}
     <div
       ref={barRef}
       className="fixed bottom-0 left-0 right-0 z-[60] border-t border-stone-200 bg-white/95 backdrop-blur-sm shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.18)]"
@@ -335,54 +353,8 @@ export default function BottomForm() {
           </button>
         </div>
 
-        {/* 동의 + 상태 문구 */}
-        <div className="mt-1.5 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-            <div className="flex items-center gap-1.5">
-              <input
-                id="bottom-form-agree"
-                type="checkbox"
-                checked={agree}
-                onChange={(e) => setAgree(e.target.checked)}
-                aria-required="true"
-                className="h-3.5 w-3.5 shrink-0 accent-stone-900"
-              />
-              <label
-                htmlFor="bottom-form-agree"
-                className="cursor-pointer select-none whitespace-nowrap text-[11px] text-stone-600 sm:text-xs"
-              >
-                <span className="font-bold text-stone-800">[필수]</span> 개인정보 동의
-              </label>
-              <a
-                href="/privacy"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="whitespace-nowrap text-[11px] font-bold text-stone-500 underline underline-offset-2 hover:text-stone-900 sm:text-xs"
-              >
-                상세
-              </a>
-            </div>
-
-            {minor && (
-              <div className="flex items-center gap-1.5">
-                <input
-                  id="bottom-form-guardian-agree"
-                  type="checkbox"
-                  checked={guardianAgree}
-                  onChange={(e) => setGuardianAgree(e.target.checked)}
-                  aria-required="true"
-                  className="h-3.5 w-3.5 shrink-0 accent-stone-900"
-                />
-                <label
-                  htmlFor="bottom-form-guardian-agree"
-                  className="cursor-pointer select-none whitespace-nowrap text-[11px] text-stone-600 sm:text-xs"
-                >
-                  <span className="font-bold text-amber-700">[필수]</span> 보호자 동의
-                </label>
-              </div>
-            )}
-          </div>
-
+        {/* 상태 문구. 동의 체크 줄은 숨겼다 — 신청 버튼을 누르면 본문 폼과 같은 동의 모달이 뜬다 */}
+        <div className="mt-1.5 flex flex-wrap items-center justify-end gap-x-3 gap-y-1">
           <p
             aria-live="polite"
             className={`min-h-[14px] text-[11px] leading-tight ${statusClass}`}
@@ -392,5 +364,6 @@ export default function BottomForm() {
         </div>
       </form>
     </div>
+    </>
   )
 }
