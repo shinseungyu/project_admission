@@ -122,13 +122,13 @@ export default function PrivacyPage() {
           </thead>
           <tbody>
             <tr>
-              <td style={S.td}>제휴 미용입시학원</td>
+              <td style={S.td}>올댓뷰티 상담사</td>
               <td style={S.td}>학원비 견적 제공 및 입시 상담</td>
               <td style={S.td}>이름, 연락처, 지역, 전공, 예산</td>
               <td style={S.td}>상담 목적 달성 후 즉시 파기</td>
             </tr>
             <tr>
-              <td style={S.td}>올댓뷰티 소속 멘토</td>
+              <td style={S.td}>올댓뷰티 상담사</td>
               <td style={S.td}>1:1 전문 멘토 상담 진행</td>
               <td style={S.td}>이름, 연락처, 지역, 전공</td>
               <td style={S.td}>상담 완료 후 즉시 파기</td>

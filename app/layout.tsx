@@ -3,6 +3,7 @@ import Script from 'next/script'
 import { Geist } from 'next/font/google'
 import './globals.css'
 import Footer from '@/components/Footer'
+import BottomForm from '@/components/BottomForm'
 
 const geist = Geist({ subsets: ['latin'], variable: '--font-geist' })
 
@@ -160,7 +161,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           .nav-cta:hover { background: #000000; }
           @media (max-width: 640px) { .nav-links { gap: 0.6rem; } .nav-link { font-size: 0.75rem; } .nav-desktop { display: none; } }
           .mobile-bottom-bar { display: none; }
-          @media (max-width: 640px) { .mobile-bottom-bar { display: flex; position: fixed; bottom: 0; left: 0; right: 0; z-index: 40; background: white; border-top: 1px solid #e5e7eb; padding: 0.75rem 1rem; gap: 0.5rem; } }
+          @media (max-width: 640px) { .mobile-bottom-bar { display: flex; position: fixed; bottom: var(--bottom-form-h, 122px); left: 0; right: 0; z-index: 40; background: white; border-top: 1px solid #e5e7eb; padding: 0.75rem 1rem; gap: 0.5rem; } }
         ` }} />
       </head>
       <body className={`${geist.variable} font-sans`}>
@@ -189,6 +190,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <a href="https://open.kakao.com" className="flex-1 py-3 text-center rounded-xl bg-[#FEE500] text-[#191919] font-bold text-sm">💬 카톡</a>
           <a href="/compare" className="flex-2 flex-grow-[2] py-3 text-center rounded-xl bg-gray-900 text-white font-bold text-sm">멘토 상담받기</a>
         </div>
+        {/* 전역 하단 고정 간편 상담 바텀폼 (모바일·PC 공통) */}
+        <BottomForm />
       </body>
     </html>
   )

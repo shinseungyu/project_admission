@@ -24,6 +24,15 @@
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
   --radius: 0.625rem;
+  /* 하단 고정 바텀폼 / 기존 모바일 하단 바 높이 (BottomForm.tsx 가 실제 높이로 갱신) */
+  --bottom-form-h: 122px;
+  --mobile-bar-h: 0px;
+}
+
+@media (max-width: 640px) {
+  :root {
+    --mobile-bar-h: 100px;
+  }
 }
 
 @theme inline {
@@ -72,6 +81,12 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* 하단 고정 바텀폼 + 기존 모바일 하단 바가 본문 마지막 내용을 가리지 않도록 여백 확보.
+   두 값은 BottomForm.tsx 가 실제 높이로 갱신하며, 아래 값은 하이드레이션 전 폴백이다. */
+body {
+  padding-bottom: calc(var(--bottom-form-h) + var(--mobile-bar-h) + env(safe-area-inset-bottom, 0px));
 }
 
 .custom-scrollbar::-webkit-scrollbar { width: 4px; }

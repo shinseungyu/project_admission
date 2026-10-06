@@ -135,13 +135,13 @@ function PrivacyContent() {
           </thead>
           <tbody>
             <tr>
-              <td className="p-2 border border-stone-200">올댓뷰티 멘토</td>
+              <td className="p-2 border border-stone-200">올댓뷰티 상담사</td>
               <td className="p-2 border border-stone-200">1:1 전문 멘토 상담 진행</td>
               <td className="p-2 border border-stone-200">이름, 연락처, 지역, 전공</td>
               <td className="p-2 border border-stone-200">상담 완료 후 즉시 파기</td>
             </tr>
             <tr>
-              <td className="p-2 border border-stone-200">제휴 미용입시학원</td>
+              <td className="p-2 border border-stone-200">올댓뷰티 상담사</td>
               <td className="p-2 border border-stone-200">학원비 견적 제공 및 입시 상담</td>
               <td className="p-2 border border-stone-200">이름, 연락처, 지역, 전공, 예산</td>
               <td className="p-2 border border-stone-200">상담 목적 달성 후 즉시 파기</td>
